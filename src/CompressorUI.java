@@ -76,7 +76,9 @@ public class CompressorUI extends JFrame
             @Override
             public void actionPerformed(ActionEvent e) {
                 String sourcePath = sourceFileField.getText();
-                String destPath = destinationFileField.getText() + "\\Compressed.txt";
+                String base  =  sourcePath.substring(0,sourcePath.lastIndexOf('.'));
+                base = base.substring(base.lastIndexOf('\\') + 1);
+                String destPath = destinationFileField.getText() + "\\" + base+ "-comp.txt";
                 HuffCompression.compress(sourcePath, destPath);
                 message.setText("Compressed successfully");
             }
@@ -125,7 +127,9 @@ public class CompressorUI extends JFrame
             @Override
             public void actionPerformed(ActionEvent e) {
                 String sourcePath = sourceFileField1.getText();
-                String destPath = destinationFileField1.getText() + "\\Decompressed.txt";
+                String base = sourcePath.substring(0,sourcePath.lastIndexOf('-'));
+                base = base.substring(base.lastIndexOf('\\')+1);
+                String destPath = destinationFileField1.getText() + "\\" + base+ "-decomp.txt";
                 HuffCompression.decompress(sourcePath, destPath);
                 message1.setText("Decompressed successfully");
             }
