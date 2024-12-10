@@ -128,8 +128,8 @@ public class CompressorUI extends JFrame
             public void actionPerformed(ActionEvent e) {
                 String sourcePath = sourceFileField1.getText();
                 String base = sourcePath.substring(0,sourcePath.lastIndexOf('-'));
-                base = base.substring(base.lastIndexOf('\\')+1);
-                String destPath = destinationFileField1.getText() + "\\" + base+ "-decomp.txt";
+                String base1 = base.substring(base.lastIndexOf('\\')+1);
+                String destPath = destinationFileField1.getText() + "\\" + base1+ "-decomp.txt";
                 HuffCompression.decompress(sourcePath, destPath);
                 message1.setText("Decompressed successfully");
             }
