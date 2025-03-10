@@ -80,15 +80,6 @@ public class HuffCompression {
 
         // Process 8-bit chunks
         for (int i = 0; i < strB.length(); i += 8) {
-//            String strByte;
-//            if (i + 8 > strB.length()) {
-//                strByte = strB.substring(i);  // Last partial byte
-//            } else {
-//                strByte = strB.substring(i, i + 8);
-//            }
-//            // Convert binary string to a byte
-//            huffCodeBytes[idx] = (byte) Integer.parseInt(strByte, 2);
-//            idx++;
             String strByte = strB.substring(i, Math.min(i + 8, strB.length()));
             while (strByte.length() < 8) {
                 strByte += "0"; // Pad with trailing zeros
@@ -98,22 +89,39 @@ public class HuffCompression {
         return huffCodeBytes;
     }
 
-    public static void decompress(String src, String dst){
-        try{
+    public static void decompress(String src, String dst) {
+        try {
             FileInputStream inStream = new FileInputStream(src);
             ObjectInputStream objectInStream = new ObjectInputStream(inStream);
-            byte[] huffmanBytes = (byte[]) objectInStream.readObject();
-            Map<Byte ,String> huffmanCodes = (Map<Byte,String>) objectInStream.readObject();
-            byte[] bytes = decomp(huffmanCodes,huffmanBytes);
+            // Read Huffman bytes safely
+            Object obj1 = objectInStream.readObject();
+            byte[] huffmanBytes = (obj1 instanceof byte[]) ? (byte[]) obj1 : null;
+            // Read Huffman codes safely
+            Object obj2 = objectInStream.readObject();
+            Map<?, ?> tempMap = (obj2 instanceof Map<?, ?>) ? (Map<?, ?>) obj2 : null;
+            Map<Byte, String> huffmanCodes = new HashMap<>();
+            if (tempMap != null) {
+                for (Map.Entry<?, ?> entry : tempMap.entrySet()) {
+                    if (entry.getKey() instanceof Byte && entry.getValue() instanceof String) {
+                        huffmanCodes.put((Byte) entry.getKey(), (String) entry.getValue());
+                    }
+                }
+            }
+            if (huffmanBytes == null || huffmanCodes.isEmpty()) {
+                throw new IOException("Corrupted or invalid Huffman data.");
+            }
+            byte[] bytes = decomp(huffmanCodes, huffmanBytes);
             OutputStream outStream = new FileOutputStream(dst);
             outStream.write(bytes);
+            // Close resources
             inStream.close();
             objectInStream.close();
             outStream.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     public static byte[] decomp(Map<Byte, String> huffmanCodes , byte[] huffmanBytes){
         StringBuilder sb1 = new StringBuilder();
         for(int i = 0; i < huffmanBytes.length; i++){
